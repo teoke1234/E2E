@@ -22,12 +22,15 @@ jobs:
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
-    # ✅ Map input -> GitHub Environment (FIX case)
-    environment: ${{ github.event.inputs.environment == 'stg' }}
+    # ✅ Correct environment selection (NOT boolean)
+    environment: ${{ github.event.inputs.environment || 'prod' }}
 
-    # ✅ Set global env 
+    # ✅ Make env available to ALL steps
     env:
       ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
+      BASE_URL: ${{ vars.BASE_URL }}
+      APP_URL: ${{ vars.APP_URL }}
+      API_URL: ${{ vars.API_URL }}
 
     steps:
       - name: 📥 Checkout code
@@ -42,53 +45,53 @@ jobs:
       - name: 📦 Install dependencies
         run: npm ci
 
-      # Cache Playwright browsers
-      - name: 💾 Cache Playwright browsers
+      # 💾 Playwright cache (FIXED ubuntu key naming)
+      - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/package-lock.json') }}
+          key: ubuntu-latest-playwright-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-
+            ubuntu-latest-playwright-
 
-      - name: 🎭 Install Playwright Browsers
+      # 🎭 Install browsers only if cache miss
+      - name: Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      - name: 🎭 Install Playwright system dependencies (cached)
+      # ⚙️ If cache hit, only install system deps
+      - name: Install Playwright system dependencies (cached)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
       # 🔍 DEBUG ENV
-      - name: 🔍 Debug ENV
+      - name: Debug ENV
         run: |
           echo "ENV_NAME=$ENV_NAME"
           echo "BASE_URL=$BASE_URL"
           echo "APP_URL=$APP_URL"
           echo "API_URL=$API_URL"
 
-      # ❗ Fail if env not loaded yet
-      - name: ✅ Validate ENV
+      # ❗ Validate ENV before tests
+      - name: Validate ENV
         run: |
           if [ -z "$BASE_URL" ]; then
-            echo "❌ BASE_URL is empty → check GitHub Environment config test"
+            echo "❌ BASE_URL is empty → check GitHub Environment variables"
             exit 1
           fi
           echo "✅ ENV loaded"
 
-      - name: 🧪 Run Playwright tests
+      # 🧪 Run tests
+      - name: Run Playwright tests
         env:
-          TEST_ENV: ${{ env.ENV_NAME }}
           ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
-          BASE_URL: ${{ vars.BASE_URL }}
-          APP_URL: ${{ vars.APP_URL }}
-          API_URL: ${{ vars.API_URL }}
           TIMEOUT: 30000
           RETRY_COUNT: 1
         run: npx playwright test
 
-      - name: 📊 Upload Playwright Report
+      # 📊 Upload report
+      - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
