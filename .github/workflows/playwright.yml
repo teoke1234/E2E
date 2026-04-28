@@ -5,7 +5,6 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
-  # Allows manual triggering of the workflow with a specified environment
   workflow_dispatch:
     inputs:
       environment:
@@ -19,9 +18,16 @@ on:
 
 jobs:
   test:
-    name: Run Playwright Tests on ${{ github.event.inputs.environment || 'prod' }}
+    name: Run Playwright Tests
     timeout-minutes: 60
     runs-on: ubuntu-latest
+
+    # ✅ Map input -> GitHub Environment (FIX case)
+    environment: ${{ github.event.inputs.environment == 'stg' }}
+
+    # ✅ Set global env 
+    env:
+      ENV_NAME: ${{ github.event.inputs.environment || 'prod' }}
 
     steps:
       - name: 📥 Checkout code
@@ -46,38 +52,46 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
 
-      # Install Playwright browsers only if cache miss
       - name: 🎭 Install Playwright Browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      # Install only system dependencies if browsers were cached
       - name: 🎭 Install Playwright system dependencies (cached)
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
+      # 🔍 DEBUG ENV
+      - name: 🔍 Debug ENV
+        run: |
+          echo "ENV_NAME=$ENV_NAME"
+          echo "BASE_URL=$BASE_URL"
+          echo "APP_URL=$APP_URL"
+          echo "API_URL=$API_URL"
+
+      # ❗ Fail if env not loaded yet
+      - name: ✅ Validate ENV
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "❌ BASE_URL is empty → check GitHub Environment config"
+            exit 1
+          fi
+          echo "✅ ENV loaded"
+
       - name: 🧪 Run Playwright tests
         env:
-          TEST_ENV: ${{ github.event.inputs.environment || 'prod' }} 
-          ACCESS_KEY: ${{ secrets.ACCESS_KEY }} 
+          TEST_ENV: ${{ env.ENV_NAME }}
+          ACCESS_KEY: ${{ secrets.ACCESS_KEY }}
           BASE_URL: ${{ vars.BASE_URL }}
           APP_URL: ${{ vars.APP_URL }}
           API_URL: ${{ vars.API_URL }}
           TIMEOUT: 30000
           RETRY_COUNT: 1
         run: npx playwright test
-        
-      - name: Print environment variables
-        run: |
-          echo "TEST_ENV=${{ env.TEST_ENV }}"
-          echo "BASE_URL=${{ env.BASE_URL }}"
-          echo "APP_URL=${{ env.APP_URL }}"
-          echo "API_URL=${{ env.API_URL }}"
 
       - name: 📊 Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ github.event.inputs.environment || 'prod' }}
+          name: playwright-report-${{ env.ENV_NAME }}
           path: playwright-report/
           retention-days: 30
