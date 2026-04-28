@@ -47,7 +47,7 @@ jobs:
           APP_URL: ${{ github.event.inputs.environment == 'stg' && 'https://checklyhq.com' || 'https://checklyhq.com' }}
           API_URL: "https://marketstack.com/v2/"
           TIMEOUT: 30000
-          RETRY_COUNT: 2
+          RETRY_COUNT: 1
         run: npx playwright test
 
       - name: 📊 Upload Playwright Report
