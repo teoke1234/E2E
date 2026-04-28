@@ -12,7 +12,7 @@ dotenv.config({
   quiet: true, // Suppress warnings if the .env file is missing
 });
 
-// 2. DEBUG CHECK (rất quan trọng)
+// 2. DEBUG CHECK 
 console.log('🔥 ENV LOADED:', {
   TEST_ENV: ENV,
   API_URL: process.env.API_URL,
@@ -22,7 +22,7 @@ export default defineConfig({
   testDir: './tests',
   timeout: Number(process.env.TIMEOUT) || 30000,
   retries: Number(process.env.RETRY_COUNT) || 2,
-
+  reporter: [['html', { outputFolder: 'playwright-report' }]],
   use: {
     baseURL: process.env.BASE_URL,
     actionTimeout: 10000,
