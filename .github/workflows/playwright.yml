@@ -72,7 +72,7 @@ jobs:
       - name: ✅ Validate ENV
         run: |
           if [ -z "$BASE_URL" ]; then
-            echo "❌ BASE_URL is empty → check GitHub Environment config"
+            echo "❌ BASE_URL is empty → check GitHub Environment config test"
             exit 1
           fi
           echo "✅ ENV loaded"
