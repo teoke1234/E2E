@@ -1,135 +1,280 @@
-# 🎭 E2E Automation Tests with Playwright
+# 🎭 E2E Automation Test Suite with Playwright
 
-End-to-end test suite build by [Playwright](https://playwright.dev/) + TypeScript, hỗ trợ đa môi trường, multi-role authentication và Page Object Model.
+A comprehensive end-to-end testing framework built with [Playwright](https://playwright.dev/) and TypeScript, featuring multi-environment support, multi-role authentication, and the Page Object Model (POM) design pattern.
 
 ---
 
-## 📋 Yêu cầu hệ thống
+## 📋 System Requirements
 
-- **Node.js** >= 18 (khuyến nghị LTS)
+- **Node.js** >= 18 (LTS recommended)
 - **npm** >= 9
 - **OS**: Windows / macOS / Linux
 
 ---
 
-## 🚀 Cài đặt
+## 🚀 Installation & Setup
 
 ```bash
-# Clone repo
+# Clone the repository
 git clone <your-repo-url>
 cd E2E
 
-# Cài đặt dependencies
+# Install dependencies
 npm install
 
-# Cài đặt Playwright browsers
+# Install Playwright browsers
 npx playwright install --with-deps
+```
 
+---
 
-📁 Folder structure
-E2E/
-├── .auth/                          # Storage state (session) user for each role - auto-generated
-├── .github/
-│   └── workflows/
-│       └── playwright.yml          # GitHub Actions CI workflow
-├── constants/
-│   ├── env.ts                      # Export enviroment variable (already loaded at playwright.config.t)
-│   └── roles.ts                    # Define RoleType (admin, userA, guest...)
-├── fixtures/
-│   ├── loginAsRole.ts              # Custom fixture for roleManager
-│   └── RoleManager.ts              # Manager multi-role browser context
-├── pages/
-│   ├── common                      # common folder store reusable component such as sideMenu or upperheader
-│   │   └── sideMenu.ts             # common                    
-│   │   └── upperHeader.ts          #
-│   ├── 1_PageManager.ts            # Tổng hợp tất cả page objects
-│   ├── LandingPage.page.ts         # Page object - Landing page
-│   └── PopupLogin.page.ts          # Page object - Popup login
-├── test-data/
-│   ├── index.ts                    # Chọn data theo CURRENT_ENV
-│   ├── login-prd.ts                # Credentials cho production
-│   └── login-stg.ts                # Credentials cho staging
-├── tests/
-│   ├── loginAllRole.setup.spec.ts  # Setup: login + lưu storage state
-│   └── example.spec.ts             # Test specs
-├── utils/                          # Helper functions chung
-├── .env.prd                        # Env cho production
-├── .env.stg                        # Env cho staging
-├── .gitignore
-├── package.json
-├── playwright.config.ts            # Trung tâm cấu hình Playwright + load env
-├── README.md
-└── tsconfig.json
+## 🌍 Environment Configuration
 
+The project supports multiple environments (Staging, Production, Dev) with environment-specific credentials and configurations.
 
+### Create environment files
 
-🌍 Quản lý đa môi trường
-Các môi trường hỗ trợ
-Môi trường	File .env	File data	Giá trị TEST_ENV
-Production	.env.prd	login-prd.ts	prd (mặc định)
-Staging	.env.stg	login-stg.ts	stg
-Cấu trúc file .env.<env>
-ENV
-BASE_URL=https://checklyhq.com
-APP_URL=https://app.checklyhq.com
+Create `.env.{environment}` files in the root directory:
+
+**`.env.stg` (Staging)**
+```env
+BASE_URL=https://staging.yourdomain.com
+API_URL=https://api-staging.yourdomain.com
 TIMEOUT=30000
 RETRY_COUNT=2
-Lưu ý: Để thêm môi trường mới (ví dụ dev):
+```
 
-Tạo file .env.dev
-Tạo file test-data/login-dev.ts
-Thêm key dev vào dataMap trong test-data/index.ts
-🧪 Chạy test
-Chạy với môi trường mặc định (production)
-BASH
-npm test
-Chạy theo môi trường cụ thể
-Môi trường	macOS / Linux	Windows PowerShell	Windows CMD
-Production	npm run test:prd	npm run test:prd	npm run test:prd
-Staging	npm run test:stg	npm run test:stg	npm run test:stg
-Các lệnh hữu ích khác
-BASH
-# Chạy 1 file test
+**`.env.prod` (Production)**
+```env
+BASE_URL=https://yourdomain.com
+API_URL=https://api.yourdomain.com
+TIMEOUT=30000
+RETRY_COUNT=2
+```
+
+### Running tests with different environments
+
+```bash
+# Run tests in staging
+$env:TEST_ENV = "stg" ; npx playwright test
+
+# Run tests in production
+$env:TEST_ENV = "prod" ; npx playwright test
+
+# Run with default (production)
+npx playwright test
+```
+
+---
+
+## 📁 Project Structure
+
+```
+E2E/
+├── .auth/                          # Browser context storage states (auto-generated)
+│   ├── admin.json                  # Authenticated session for admin role
+│   ├── userA.json                  # Authenticated session for userA role
+│   └── guest.json                  # Session state for guest role
+├── .github/
+│   └── workflows/
+│       └── playwright.yml          # GitHub Actions CI/CD workflow
+├── constants/
+│   ├── env.ts                      # Environment variables (pre-loaded in playwright.config.ts)
+│   └── roles.ts                    # Role definitions (admin, userA, guest)
+├── fixtures/
+│   ├── api.ts                      # API client fixture (Marketstack)
+│   ├── fixtureMerge.ts             # Merged fixtures configuration
+│   ├── loginAsRole.ts              # Multi-role authentication fixture
+│   └── RoleManager.ts              # Browser context manager for multiple roles
+├── pages/
+│   ├── common/
+│   │   ├── sideMenu.ts             # Sidebar menu component (reusable)
+│   │   └── upperHeader.ts          # Header component (reusable)
+│   ├── 1_PageManager.ts            # Aggregates all page objects
+│   ├── DashBoard.page.ts           # Dashboard page object
+│   ├── LandingPage.page.ts         # Landing page object
+│   └── PopupLogin.page.ts          # Login popup page object
+├── services/
+│   └── marketstack.client.ts       # API client for Marketstack service
+├── test-data/
+│   ├── index.ts                    # Selects credentials based on environment
+│   ├── login-stg.ts                # Staging credentials
+│   └── login-prod.ts               # Production credentials
+├── tests/
+│   ├── example.spec.ts             # Example test cases
+│   └── loginAllRole.setup.spec.ts  # Global setup: authentication for all roles
+├── utils/                          # Utility functions (helpers, validators, etc.)
+├── playwright.config.ts            # Playwright configuration
+├── tsconfig.json                   # TypeScript configuration with path aliases
+└── package.json                    # Project dependencies
+```
+
+---
+
+## 🔑 Key Features
+
+### 1. **Multi-Role Authentication**
+- Support for multiple user roles (admin, userA, guest)
+- Pre-authenticated browser contexts stored in `.auth/` folder
+- Seamless role switching within tests using `RoleManager`
+
+### 2. **Page Object Model (POM)**
+- Centralized page objects for maintainability
+- Reusable common components (SideMenu, Header, etc.)
+- Single `PageManager` to manage all pages
+
+### 3. **Multi-Environment Support**
+- Environment-specific configurations (staging, production, dev)
+- Easy switching via `TEST_ENV` variable
+- Secure credential management per environment
+
+### 4. **API Testing Integration**
+- Built-in API client for external services (Marketstack)
+- Combined with UI testing in single test suite
+- Type-safe API interactions
+
+### 5. **Custom Fixtures**
+- `roleManager` - Manages multiple authenticated browser contexts
+- `marketApi` - API client for service interactions
+- Merged fixtures for easy test composition
+
+### 6. **TypeScript Path Aliases**
+- `@constants/*` - Constants directory
+- `@test-data/*` - Test data directory
+- `@pages/*` - Page objects directory
+- `@fixtures/*` - Fixtures directory
+- `@services/*` - Services directory
+- `@utils/*` - Utils directory
+
+---
+
+## 🧪 Running Tests
+
+### Run all tests
+```bash
+npx playwright test
+```
+
+### Run tests in headed mode (visible browser)
+```bash
+npx playwright test --headed
+```
+
+### Run tests for a specific browser
+```bash
+npx playwright test --project=chromium
+```
+
+### Run tests matching a pattern
+```bash
+npx playwright test --grep @TC_001
+```
+
+### Run a specific test file
+```bash
 npx playwright test tests/example.spec.ts
+```
 
-# Chạy ở chế độ UI Mode (debug trực quan)
-npm run test:ui
+### Run tests with debugging
+```bash
+npx playwright test --debug
+```
 
-# Chạy ở chế độ headed (nhìn thấy browser)
-npm run test:headed
+### View test report
+```bash
+npx playwright show-report
+```
 
-# Chạy theo tag
-npx playwright test --grep "@TC_001"
+---
 
-# Xem report HTML
-npm run report
-🔐 Cơ chế Authentication
-Project dùng storage state để re-use login session, tránh login lại mỗi test:
+## 📝 Test Structure
 
-Setup phase (loginAllRole.setup.spec.ts): Login lần đầu cho từng role, lưu cookie/session vào .auth/<role>.json.
-Test phase: Mỗi test gọi roleManager.asRole('admin') để lấy browser context đã đăng nhập sẵn.
-TYPESCRIPT
-test('Example', async ({ roleManager }) => {
+### Setup Tests (Global Authentication)
+The `loginAllRole.setup.spec.ts` file runs once before all tests to authenticate users and save their browser states:
+
+```typescript
+for (const user of credentials) {
+  setup(`Setup auth for ${user.role}`, async ({ page }) => {
+    const popupLogin = new PopupLoginPage(page);
+    await popupLogin.performLogin(user.email, user.password);
+    // Storage state saved to .auth/{role}.json
+  });
+}
+```
+
+### Example Test with Multi-Role Support
+```typescript
+test('@TC_001 Navigate as different roles', async ({ roleManager }) => {
+  // Access admin context
   const admin = await roleManager.asRole('admin');
   await admin.goto(APP_URL);
-  // ...
+
+  // Switch to userA context
+  const userA = await roleManager.asRole('userA');
+  await userA.goto(APP_URL);
+  await userA.dashboardPage.upperHeader.openSideBar();
+  await userA.dashboardPage.sideMenu.clickSideMenuOption('Heartbeats');
 });
-🤖 CI/CD - GitHub Actions
-Pipeline tự động chạy khi:
+```
 
-Push lên branch main / master
-Tạo Pull Request vào main / master
-Xem file: .github/workflows/playwright.yml
+### Example API Test
+```typescript
+test('@TC_004 API test - Marketstack', async ({ marketApi }) => {
+  const response = await marketApi.getEod('AAPL');
+  const filteredData = response.data.filter(item => item.close > 272);
+  expect(filteredData.length).toBeGreaterThan(0);
+});
+```
 
-Report được upload lên GitHub Actions artifacts (giữ 30 ngày).
+---
 
-🛠️ Troubleshooting
-Vấn đề	Giải pháp
-Storage state file not found	Chạy npm test hoặc setup project trước: npx playwright test --project=setup
-Test bị timeout	Tăng TIMEOUT trong file .env.<env>
-Browsers chưa cài	Chạy npx playwright install --with-deps
-Env không được load	Kiểm tra file .env.<env> đã tồn tại và đúng chính tả
-📚 Tài liệu tham khảo
-Playwright Docs
-Page Object Model
-Authentication
+## 🛠️ Best Practices
+
+1. **Use Page Object Model** - Encapsulate UI interactions in page objects
+2. **Organize Common Components** - Place reusable UI components in `/pages/common`
+3. **Environment-Based Credentials** - Store sensitive data in `.env` files (never commit)
+4. **Global Setup** - Use setup tests for authentication to reduce redundant logins
+5. **Meaningful Test Names** - Use test IDs (@TC_###) for easy identification
+6. **Role-Based Testing** - Leverage `RoleManager` for testing different user permissions
+7. **Soft Assertions** - Use `expect.soft()` for non-blocking assertions
+
+---
+
+## 📋 Playwright Configuration
+
+Key settings in `playwright.config.ts`:
+
+- **Test Directory**: `./tests`
+- **Timeout**: 30 seconds (configurable via `.env`)
+- **Retries**: 2 (configurable via `.env`)
+- **Projects**: Setup + Chromium, Firefox, WebKit
+- **Trace**: `on-first-retry` - collect traces for failed tests
+- **Base URL**: Loaded from environment variables
+
+---
+
+## 🔗 Dependencies
+
+- `@playwright/test` - Testing framework
+- `@types/node` - TypeScript Node types
+- `dotenv` - Environment variable management
+- `cross-env` - Cross-platform environment variables
+- `typescript` - TypeScript compiler
+
+---
+
+## 📚 Resources
+
+- [Playwright Documentation](https://playwright.dev)
+- [Playwright API Reference](https://playwright.dev/docs/api/class-playwright)
+- [Best Practices](https://playwright.dev/docs/best-practices)
+
+---
+
+## 👤 Author
+
+Created for comprehensive E2E testing automation.
+
+---
+
+

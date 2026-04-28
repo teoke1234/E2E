@@ -30,9 +30,9 @@ test('@TC_004 API test', async ({ marketApi }) => {
 
   
   const totalClose = response.data
-    .filter(item => item.close > 272)
-    .map(item => item.close)
-    .reduce((sum, price) => sum + price, 0);
+    .filter((item : any) => item.close > 272)
+    .map((item : any) => item.close)
+    .reduce((sum : number, price : number) => sum + price, 0);
   console.log(totalClose);
 
 

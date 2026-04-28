@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "ignoreDeprecations": "6.0",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "baseUrl": ".",
@@ -8,7 +9,8 @@
       "@test-data/*": ["test-data/*"],
       "@pages/*": ["pages/*"],
       "@fixtures/*": ["fixtures/*"],
-      "@services/*": ["services/*"]
+      "@services/*": ["services/*"],
+      "@utils/*": ["utils/*"]
     }
   }
 }
