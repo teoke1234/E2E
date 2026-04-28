@@ -16,7 +16,7 @@ A comprehensive end-to-end testing framework built with [Playwright](https://pla
 
 ```bash
 # Clone the repository
-git clone <your-repo-url>
+git clone <[your-repo-url](https://github.com/teoke1234/E2E)>
 cd E2E
 
 # Install dependencies
@@ -30,7 +30,7 @@ npx playwright install --with-deps
 
 ## 🌍 Environment Configuration
 
-The project supports multiple environments (Staging, Production, Dev) with environment-specific credentials and configurations.
+The project supports multiple environments (Staging, Production) with environment-specific credentials and configurations.
 
 ### Create environment files
 
