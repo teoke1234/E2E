@@ -11,15 +11,15 @@ on:
       environment:
         description: 'Test environment'
         required: true
-        default: 'prd'
+        default: 'prod'
         type: choice
         options:
-          - prd
+          - prod
           - stg
 
 jobs:
   test:
-    name: Run Playwright Tests on ${{ github.event.inputs.environment || 'prd' }}
+    name: Run Playwright Tests on ${{ github.event.inputs.environment || 'prod' }}
     timeout-minutes: 60
     runs-on: ubuntu-latest
 
@@ -41,13 +41,13 @@ jobs:
 
       - name: 🧪 Run Playwright tests
         env:
-          TEST_ENV: ${{ github.event.inputs.environment || 'prd' }}
+          TEST_ENV: ${{ github.event.inputs.environment || 'prod' }}
         run: npx playwright test
 
       - name: 📊 Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-${{ github.event.inputs.environment || 'prd' }}
+          name: playwright-report-${{ github.event.inputs.environment || 'prod' }}
           path: playwright-report/
           retention-days: 30

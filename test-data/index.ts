@@ -2,9 +2,11 @@ import { CURRENT_ENV } from '@constants/env';
 import { loginCredential as stgLoginData } from './login-stg';
 import { loginCredential as prodLoginData } from './login-prod';
 
-const dataMap = {
+type Environment = 'stg' | 'prod';
+
+const dataMap: Record<Environment, typeof stgLoginData> = {
   stg: stgLoginData,
-  prd: prodLoginData,
+  prod: prodLoginData,
 };
 
-export const credentials = dataMap[CURRENT_ENV] || prodLoginData;
+export const credentials = dataMap[CURRENT_ENV as Environment] || prodLoginData;

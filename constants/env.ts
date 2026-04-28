@@ -1,4 +1,4 @@
-export const CURRENT_ENV = process.env.TEST_ENV || 'prd';
+export const CURRENT_ENV = process.env.TEST_ENV || 'prod';
 
 export const BASE_URL = process.env.BASE_URL || 'https://www.checklyhq.com/';
 export const APP_URL = process.env.APP_URL || 'https://app.checklyhq.com/';
