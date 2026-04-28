@@ -16,7 +16,7 @@ A comprehensive end-to-end testing framework built with [Playwright](https://pla
 
 ```bash
 # Clone the repository
-git clone <[your-repo-url](https://github.com/teoke1234/E2E)>
+git clone (https://github.com/teoke1234/E2E)
 cd E2E
 
 # Install dependencies
